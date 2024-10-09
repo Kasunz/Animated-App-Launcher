@@ -1,5 +1,5 @@
 import tkinter as tk
-# from PIL import Image, ImageTk
+from PIL import Image, ImageTk
 # import subprocess
 
 class AppLauncher:
@@ -22,6 +22,22 @@ class AppLauncher:
         # Variables to track the window position
         self._offsetx = 0
         self._offsety = 0
+
+        self.load_icon()
+
+    def load_icon(self):
+        image_path = "icons/ThisPC.png"
+        image = Image.open(image_path)
+        image = image.resize((40, 40), Image.Resampling.LANCZOS) # Resize to fit the small window
+        icon = ImageTk.PhotoImage(image)
+
+        # Create a button with the icon
+        icon_button = tk.Button(self.root, image=icon, command=self.icon_clicked, bg="#202124", bd=0)
+        icon_button.image = icon
+        icon_button.pack()
+
+    def icon_clicked(self):
+        print("Icon clicked! Launch app here...")
 
     def start_move(self, event):
         self._offsetx = event.x
