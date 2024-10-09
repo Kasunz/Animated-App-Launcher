@@ -4,7 +4,7 @@ import subprocess
 import json
 
 class AppLauncher:
-    def __init__(self, width=50, height=600):
+    def __init__(self, width=70, height=600):
         # Initialize the app launcher window
         self.root = tk.Tk()
         self.root.title('App Launcher')
@@ -15,7 +15,7 @@ class AppLauncher:
         self.root.overrideredirect(True)
 
         # Set minimum width and height
-        self.root.minsize(width=50, height=height)
+        self.root.minsize(width=70, height=height)
 
         # Bind mouse events to make the window draggable
         self.root.bind("<Button-1>", self.start_move)
@@ -29,8 +29,8 @@ class AppLauncher:
         self.canvas = tk.Canvas(self.root, width=width, height=height, bg="#202124", highlightthickness=0)
         self.canvas.pack(expand=True, fill=tk.BOTH)
 
-        # Draw the initial border rectangle
-        self.rect = self.canvas.create_rectangle(5, 5, width - 5, height - 5, outline="#BB86FC", width=4)
+        # Create multiple borders with decreasing sizes and transparency
+        self.create_borders(width, height)
 
         # Start the glowing animation
         self.glow_color_index = 0
@@ -40,8 +40,38 @@ class AppLauncher:
         # Load the apps from the JSON file
         self.load_apps()
 
+    def create_borders(self, width, height):
+        """Create multiple transparent borders with decreasing size and rounded corners."""
+        border_colors = ["#BB86FC", "#3700B3", "#03DAC6", "#FFFFFF"]  # Example colors
+
+        # Create the outermost border and assign it to self.rect for animation
+        self.rect = self.create_rounded_rectangle(5, 5, width - 5, height - 5, radius=20, outline=border_colors[0], width=4)
+
+        # Create 3 more borders inside the outermost one
+        self.create_rounded_rectangle(12, 12, width - 12, height - 12, radius=15, outline=border_colors[1], width=3)
+        self.create_rounded_rectangle(18, 18, width - 18, height - 18, radius=10, outline=border_colors[2], width=2)
+        self.create_rounded_rectangle(24, 24, width - 24, height - 24, radius=5, outline=border_colors[3], width=1)
+
+    def create_rounded_rectangle(self, x1, y1, x2, y2, radius=25, **kwargs):
+        """Create a rounded rectangle using a combination of lines and arcs."""
+        points = [x1+radius, y1,
+                  x2-radius, y1,
+                  x2, y1,
+                  x2, y1+radius,
+                  x2, y2-radius,
+                  x2, y2,
+                  x2-radius, y2,
+                  x1+radius, y2,
+                  x1, y2,
+                  x1, y2-radius,
+                  x1, y1+radius,
+                  x1, y1]
+
+        return self.canvas.create_polygon(points, smooth=True, **kwargs)
+
     def animate_glow(self):
-        # Change the outline color of the border
+        """Animate the border glow effect by changing the rectangle's outline color."""
+        # Change the outline color of the outermost border
         current_color = self.glow_colors[self.glow_color_index]
         self.canvas.itemconfig(self.rect, outline=current_color)
 
@@ -64,10 +94,10 @@ class AppLauncher:
             print(f"Failed to load apps: {e}")
 
     def create_icon(self, image_path, command, index):
-
+        """Create and place an icon button."""
         try:
             image = Image.open(image_path)
-            image = image.resize((20, 20), Image.Resampling.LANCZOS)
+            image = image.resize((30, 30), Image.Resampling.LANCZOS)
             icon = ImageTk.PhotoImage(image)
 
             # Create a button with the icon
@@ -79,14 +109,20 @@ class AppLauncher:
                 bd=0
             )
 
-            # Add hover effect
-            icon_button.bind("<Enter>", lambda e: icon_button.config(bg="#333333"))
-            icon_button.bind("<Leave>", lambda e: icon_button.config(bg="#202124"))
+            # Add hover effect to make icon enlarge on hover
+            def on_hover(e):
+                icon_button.config(width=40, height=40)
+
+            def on_leave(e):
+                icon_button.config(width=30, height=30)
+
+            icon_button.bind("<Enter>", on_hover)
+            icon_button.bind("<Leave>", on_leave)
 
             icon_button.image = icon
 
             # Place the icon button inside the canvas
-            self.canvas.create_window(25, 50 + (index * 60), window=icon_button)  # Adjust position
+            self.canvas.create_window(35, 50 + (index * 60), window=icon_button)  # Adjust position
 
         except Exception as e:
             print(f"Error loading icon from {image_path}: {e}")
