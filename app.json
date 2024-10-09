@@ -1,0 +1,17 @@
+[
+    {
+        "name": "This PC",
+        "icon": "icons/ThisPC.png",
+        "command": ["explorer"]
+    },
+    {
+        "name": "Recycle Bin",
+        "icon": "icons/RecycleBin.png",
+        "command": ["shell:RecycleBinFolder"]
+    },
+    {
+        "name": "YouTube",
+        "icon": "icons/YouTube.png",
+        "command": ["C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe", "https://www.youtube.com"]
+    }
+]
